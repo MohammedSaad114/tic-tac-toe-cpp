@@ -1,6 +1,6 @@
 # 🎮 Tic Tac Toe (C++ / Raylib)
 
-A simple raylib learning project creating Tic-Tac-Toe with C++.
+A simple raylib self-learning project creating Tic-Tac-Toe with C++.
 
 ![Gameplay Screenshot](resources/example.gif)
 
