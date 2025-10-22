@@ -20,6 +20,8 @@ struct App {
 	int tileSize{ 80 };
 	Vector2 origin{};
 	Rectangle tiles[3][3]{};
+
+	Font uiFont;
 };
 
 /**
@@ -31,3 +33,8 @@ void initApp(App& app, int w, int h);
 * handles input, update of one frame
 */
 void frame(App& app);
+
+/**
+* Cleans up used resources by app
+*/
+void cleanupApp(App& app);

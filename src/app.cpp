@@ -14,18 +14,27 @@ void initApp(App& a, int w, int h)
     a.aiDelay = 0.5;
     a.tileSize = 80;
     a.origin = { a.width / 2.0f - 1.5f * a.tileSize, a.height / 2.0f - 1.5f * a.tileSize };
+    a.uiFont = LoadFontEx("resources/OpenSans_Condensed-Bold.ttf", 128, nullptr, 0);
+    SetTextureFilter(a.uiFont.texture, TEXTURE_FILTER_BILINEAR);
 }
 
-static void drawCenteredText(const char* s, int y, int size, Color c, int winW)
+static void drawCenteredText(App& a, const char* s, Rectangle r, float fontSize, Color c)
 {
-    int tw = MeasureText(s, size);
-    DrawText(s, (winW - tw) / 2, y, size, c);
+   
+    Vector2 size = MeasureTextEx(a.uiFont, s, fontSize, 1.0f);
+    Vector2 pos{
+       r.x + (r.width - size.x) / 2.0f,
+       r.y + (r.height - size.y) / 2.0f
+    };
+    DrawTextEx(a.uiFont, s, pos, fontSize, 1.0f, c);
 }
 
 static void drawMenu(App& a)
 {
     // Title
-    drawCenteredText("Play Tic-Tac-Toe", 50, 40, RAYWHITE, a.width);
+    const int tfs = 40;
+    int tw = MeasureText("Play Tic-Tac-Toe", tfs);
+    DrawText("Play Tic-Tac-Toe", (a.width - tw) / 2, 40, tfs, RAYWHITE);
 
     // Buttons
     Rectangle bx{ a.width / 8.0f,   a.height / 2.0f, a.width / 4.0f, 50.0f };
@@ -61,10 +70,7 @@ static void drawBoard(App& a)
             if (v != EMPTY)
             {
                 const char* s = (v == X) ? "X" : "O";
-                int fs = 60;
-                int tw = MeasureText(s, fs);
-                DrawText(s, (int)(r.x + (r.width - tw) / 2),
-                            (int)(r.y + (r.height - fs) / 2), fs, RAYWHITE);
+                drawCenteredText(a, s, a.tiles[i][j], 60.0f, RAYWHITE);
             }
         }
 }
@@ -105,7 +111,9 @@ static void updatePlaying(App& a)
         status = (a.user == turn) ? ((a.user == X) ? "Play as X" : "Play as O")
             : "Computer thinking...";
     }
-    drawCenteredText(status, 20, 32, RAYWHITE, a.width);
+    const int sfs = 32;
+    int sw = MeasureText(status, sfs);
+    DrawText(status, (a.width - sw) / 2, 20, sfs, RAYWHITE);
 
     // Board
     drawBoard(a);
@@ -146,4 +154,8 @@ void frame(App& app)
         case State::Menu:    drawMenu(app);    break;
         case State::Playing: updatePlaying(app); break;
     }
+}
+
+void cleanupApp(App& app) {
+    UnloadFont(app.uiFont);
 }
