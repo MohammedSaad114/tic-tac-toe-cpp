@@ -6,7 +6,7 @@ A simple raylib learning project creating Tic-Tac-Toe with C++.
 
 ---
 
-## ✨ Features
+## Features
 - 🕹️ Player vs AI
 - 🧩 Modular UI built with raylib
 
@@ -14,7 +14,7 @@ A simple raylib learning project creating Tic-Tac-Toe with C++.
 
 ## ⚙️ Build & Run
 
-### 🪟 Windows (Visual Studio)
+### Windows (Visual Studio)
 Run the provided build script:
 ```bash
 build-VisualStudio2022.bat 
