@@ -1,6 +1,6 @@
-# tic-tac-toe-cpp
-A simple 2D Tic-Tac-Toe in C++ with raylib for rendering and input.
-
+# 🎮 Tic Tac Toe (C++ / Raylib)
+A simple raylib learning project creating Tic-Tac-Toe with C++.
+![Gameplay Screenshot](resources/example.gif)
 ---
 
 ## Resources / Links
