@@ -12,13 +12,6 @@ A simple raylib learning project creating Tic-Tac-Toe with C++.
 
 ---
 
-## Resources / Links
-
-* **Raylib:** https://github.com/raylib-extras/raylib-quickstart
-* **Raylib Cheatsheet:** https://www.raylib.com/cheatsheet/cheatsheet.html
-
----
-
 ## ⚙️ Build & Run
 
 ### 🪟 Windows (Visual Studio)
@@ -30,6 +23,14 @@ This generates the Visual Studio solution and project files automatically.
 Then open the .sln file, build, and run.
 
 ---
+
+## Resources / Links
+
+* **Raylib:** https://github.com/raylib-extras/raylib-quickstart
+* **Raylib Cheatsheet:** https://www.raylib.com/cheatsheet/cheatsheet.html
+
+---
+
 ## License
 
 MIT
