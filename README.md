@@ -34,4 +34,4 @@ Then open the .sln file, build, and run.
 
 ## License
 
-MIT
+[MIT](LICENSE)
