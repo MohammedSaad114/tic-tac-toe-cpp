@@ -6,8 +6,13 @@ App::App(int w, int h): m_width{w}, m_height{h}, m_game {Game(Cell::EMPTY)} {
 
 void App::drawCenteredText(const char* s, int y, int size, Color c, int winW)
 {
-    int tw = MeasureText(s, size);
-    DrawText(s, (winW - tw) / 2, y, size, c);
+   
+    Vector2 size = MeasureTextEx(a.uiFont, s, fontSize, 1.0f);
+    Vector2 pos{
+       r.x + (r.width - size.x) / 2.0f,
+       r.y + (r.height - size.y) / 2.0f
+    };
+    DrawTextEx(a.uiFont, s, pos, fontSize, 1.0f, c);
 }
 
 void App::drawMenu()
