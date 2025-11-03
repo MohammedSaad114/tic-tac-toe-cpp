@@ -1,35 +1,23 @@
 #include "app.h"
-#include <limits>
 
-static const Move kNoMove{ -1,-1 };
+App::App(int w, int h): m_width{w}, m_height{h}, m_game {Game(Cell::EMPTY)} {
+    m_origin = { m_width / 2.0f - 1.5f * m_tileSize, m_height / 2.0f - 1.5f * m_tileSize };
+};
 
-void initApp(App& a, int w, int h)
-{
-    a.width = w; a.height = h;
-    a.state = State::Menu;
-    a.user = 0;
-    a.board = initialState();
-    a.aiTurn = false;
-    a.aiTimer = 0.0;
-    a.aiDelay = 0.5;
-    a.tileSize = 80;
-    a.origin = { a.width / 2.0f - 1.5f * a.tileSize, a.height / 2.0f - 1.5f * a.tileSize };
-}
-
-static void drawCenteredText(const char* s, int y, int size, Color c, int winW)
+void App::drawCenteredText(const char* s, int y, int size, Color c, int winW)
 {
     int tw = MeasureText(s, size);
     DrawText(s, (winW - tw) / 2, y, size, c);
 }
 
-static void drawMenu(App& a)
+void App::drawMenu()
 {
     // Title
-    drawCenteredText("Play Tic-Tac-Toe", 50, 40, RAYWHITE, a.width);
+    drawCenteredText("Play Tic-Tac-Toe", 50, 40, RAYWHITE, m_width);
 
     // Buttons
-    Rectangle bx{ a.width / 8.0f,   a.height / 2.0f, a.width / 4.0f, 50.0f };
-    Rectangle bo{ 5 * a.width / 8.0f, a.height / 2.0f, a.width / 4.0f, 50.0f };
+    Rectangle bx{ m_width / 8.0f,   m_height / 2.0f, m_width / 4.0f, 50.0f };
+    Rectangle bo{ 5 * m_width / 8.0f, m_height / 2.0f, m_width / 4.0f, 50.0f };
 
     DrawRectangleRec(bx, RAYWHITE);
     int twX = MeasureText("Play as X", 24);
@@ -42,108 +30,131 @@ static void drawMenu(App& a)
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
         Vector2 m = GetMousePosition();
-        if (CheckCollisionPointRec(m, bx)) { a.user = X; a.board = initialState(); a.state = State::Playing; }
-        else if (CheckCollisionPointRec(m, bo)) { a.user = O; a.board = initialState(); a.state = State::Playing; }
+        if (CheckCollisionPointRec(m, bx)) { m_user = X; m_game.m_board; m_state = State::Playing; }
+        else if (CheckCollisionPointRec(m, bo)) { m_user = O; m_game.m_board; m_state = State::Playing; }
     }
 }
 
-static void drawBoard(App& a)
+void App::drawBoard()
 {
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-        {
-            Rectangle r{ a.origin.x + j * a.tileSize, a.origin.y + i * a.tileSize,
-                         (float)a.tileSize, (float)a.tileSize };
-            a.tiles[i][j] = r;
-            DrawRectangleLinesEx(r, 3.0f, RAYWHITE);
+	for (int i = 0; i < 3; ++i)
+		for (int j = 0; j < 3; ++j)
+		{
+			Rectangle r{ m_origin.x + j * m_tileSize, m_origin.y + i * m_tileSize,
+						 (float)m_tileSize, (float)m_tileSize };
+			m_tiles[i][j] = r;
+			DrawRectangleLinesEx(r, 3.0f, RAYWHITE);
 
-            int v = a.board[i][j];
-            if (v != EMPTY)
-            {
-                const char* s = (v == X) ? "X" : "O";
-                int fs = 60;
-                int tw = MeasureText(s, fs);
-                DrawText(s, (int)(r.x + (r.width - tw) / 2),
-                            (int)(r.y + (r.height - fs) / 2), fs, RAYWHITE);
-            }
-        }
+			int v = m_game.m_board.grid[i][j];
+			if (v != EMPTY)
+			{
+				const char* s = (v == X) ? "X" : "O";
+				int fs = 60;
+				int tw = MeasureText(s, fs);
+				DrawText(s, (int)(r.x + (r.width - tw) / 2),
+							(int)(r.y + (r.height - fs) / 2), fs, RAYWHITE);
+			}
+		}
 }
 
-static void playAgain(App& a)
+void App::playAgain()
 {
-    Rectangle again{ a.width / 3.0f, a.height - 65.0f, a.width / 3.0f, 50.0f };
-    DrawRectangleRec(again, RAYWHITE);
-    int tw = MeasureText("Play Again", 24);
-    DrawText("Play Again", again.x + (again.width - tw) / 2, again.y + (again.height - 24) / 2, 24, BLACK);
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-        Vector2 m = GetMousePosition();
-        if (CheckCollisionPointRec(m, again))
-        {
-            a.state = State::Menu;
-            a.user = 0;
-            a.board = initialState();
-            a.aiTurn = false;
-        }
-    }
+	Rectangle again{ m_width / 3.0f, m_height - 65.0f, m_width / 3.0f, 50.0f };
+	DrawRectangleRec(again, RAYWHITE);
+	int tw = MeasureText("Play Again", 24);
+	DrawText("Play Again", again.x + (again.width - tw) / 2, again.y + (again.height - 24) / 2, 24, BLACK);
+	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+	{
+		Vector2 m = GetMousePosition();
+		if (CheckCollisionPointRec(m, again))
+		{
+			m_state = State::Menu;
+			m_user = 0;
+			m_game.resetBoard();
+			m_aiTurn = false;
+		}
+	}
 }
 
-static void updatePlaying(App& a)
+void App::updatePlaying()
 {
-    bool over = terminal(a.board);
-    int turn = player(a.board);
+	bool over = m_game.terminal(m_game.m_board);
+	int turn = m_game.player(m_game.m_board);
 
-    // Status
-    const char* status = nullptr;
-    if (over)
-    {
-        int w = winner(a.board);
-        status = (w == 0) ? "Game Over: Tie." : (w == X ? "Game Over: X wins." : "Game Over: O wins.");
-    }
-    else
-    {
-        status = (a.user == turn) ? ((a.user == X) ? "Play as X" : "Play as O")
-            : "Computer thinking...";
-    }
-    drawCenteredText(status, 20, 32, RAYWHITE, a.width);
+	// Status
+	const char* status = nullptr;
+	if (over)
+	{
+		int w = m_game.winner(m_game.m_board);
+		status = (w == 0) ? "Game Over: Tie." : (w == X ? "Game Over: X wins." : "Game Over: O wins.");
+	}
+	else
+	{
+		status = (m_user == turn) ? ((m_user == X) ? "Play as X" : "Play as O")
+			: "Computer thinking...";
+	}
+	drawCenteredText(status, 20, 32, RAYWHITE, m_width);
 
-    // Board
-    drawBoard(a);
+	// Board
+	drawBoard();
 
-    // AI move
-    if (!over && a.user != turn)
-    {
-        if (!a.aiTurn) { a.aiTurn = true; a.aiTimer = GetTime(); }
-        else if (GetTime() - a.aiTimer >= a.aiDelay)
-        {
-            auto best = optimalAction(a.board);        // {score, Move}
-            if (best.second != kNoMove) a.board = result(a.board, best.second);
-            a.aiTurn = false;
-        }
-    }
+	// AI move
+	if (!over && m_user != turn)
+	{
+		if (!m_aiTurn) { m_aiTurn = true; m_aiTimer = GetTime(); }
+		else if (GetTime() - m_aiTimer >= m_aiDelay)
+		{
+			auto best = m_game.optimalAction(m_game.m_board);        // {score, Move}
+			if (best.second != kNoMove) m_game.m_board = m_game.result(m_game.m_board, best.second);
+			m_aiTurn = false;
+		}
+	}
 
-    // Human move
-    if (!over && a.user == turn && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-        Vector2 m = GetMousePosition();
-        for (int i = 0; i < 3; ++i) for (int j = 0; j < 3; ++j)
-        {
-            if (a.board[i][j] == EMPTY && CheckCollisionPointRec(m, a.tiles[i][j]))
-            {
-                a.board = result(a.board, { i,j });
-            }
-        }
-    }
+	// Human move
+	if (!over && m_user == turn && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+	{
+		Vector2 m = GetMousePosition();
+		for (int i = 0; i < 3; ++i) for (int j = 0; j < 3; ++j)
+		{
+			if (m_game.m_board.grid[i][j] == EMPTY && CheckCollisionPointRec(m, m_tiles[i][j]))
+			{
+				m_game.m_board = m_game.result(m_game.m_board, { i,j });
+			}
+		}
+	}
 
-    // Play again UI
-    if (over) playAgain(a);
+	// Play again UI
+	if (over) playAgain();
 }
 
-void frame(App& app)
+void App::frame()
 {
-    switch (app.state)
-    {
-        case State::Menu:    drawMenu(app);    break;
-        case State::Playing: updatePlaying(app); break;
-    }
+	switch (App::m_state)
+	{
+		case State::Menu: drawMenu(); break;
+		case State::Playing: updatePlaying(); break;
+	}
 }
+
+void App::runGame()
+{   
+	// Tell the window to use vsync and work on high DPI displays
+	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);	
+	// Create the window and OpenGL context
+	InitWindow(m_width, m_height, "Tic Tac Toe");
+	SetTargetFPS(60);
+
+	// game loop
+	while (!WindowShouldClose()) {		
+		// run the loop untill the user presses ESCAPE or presses the Close button on the window
+		// drawing
+		BeginDrawing();
+		ClearBackground(BLACK);
+		frame();
+		// end the frame and get ready for the next one  (display frame, poll input, etc...)
+		EndDrawing();
+	}
+	// destroy the window and cleanup the OpenGL context
+	CloseWindow();
+}
+

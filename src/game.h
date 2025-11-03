@@ -6,49 +6,76 @@
 #include <set>
 #include <utility>
 
-enum Cell{ EMPTY = 0, X = 1, O = -1};
+enum Cell{ O = -1, EMPTY = 0, X = 1 };
 
-using Board = std::vector<std::vector<int>>;
-using Move = std::pair<int, int>;
-using Eval = std::pair<int, Move>; // {score, best move}
+struct Board {
+	std::vector<std::vector<Cell>> grid;
 
-struct Game {
-    Board board{};
-    int current = X;
-    bool gameOver = false;
+	bool isEmpty() const
+	{
+		for (const auto& row : grid)
+			for (int cell : row)
+				if (cell != EMPTY)
+					return false;
+		return true;
+	}
 };
 
-/**
-* returns initial empty 3x3 board
-*/
-Board initialState();
+using Move = std::pair<int, int>;
+using Eval = std::pair<int, Move>; // {score, best move}
+static const Move kNoMove{ -1,-1 };
 
-/**
-* returns the player with the next turn
-*/
-int player(const Board& board);
+class Game {
+public:
+	Board m_board{ std::vector<std::vector<Cell>>(3, std::vector<Cell>(3, EMPTY)) };
+private:
+	Cell m_current { X };
+	bool m_gameOver { false };
 
-/**
-* returns a set of all possible actions
-*/
-std::set<Move> actions(const Board& board);
+public:
+	Game(Cell currentPlayer);
 
-/**
-* returns a board that results from an action
-*/
-Board result(const Board& board, Move action);
+	void resetBoard();
+    /**
+    * returns the player with the next turn
+    */
+	Cell player(const Board& board);
 
-/**
-* returns a winner if there is any
-*/
-int winner(const Board& board);
+	/**
+	* returns a set of all possible actions
+	*/
+	std::set<Move> actions(const Board& board);
 
-/**
-* checks if game is over
-*/
-bool terminal(const Board& board);
+	/**
+	* returns a board that results from an action
+	*/
+	Board result(const Board& board, Move action);
 
-/**
-* returns optimal action for current player
-*/
-Eval optimalAction(const Board& board);
+	/**
+	* returns a winner if there is any
+	*/
+	Cell winner(const Board& board);
+
+	/**
+	* checks if game is over
+	*/
+	bool terminal(const Board& board);
+
+	/**
+	* returns optimal action for current player
+	*/
+	Eval optimalAction(const Board& board);
+private:
+	/**
+	* Max value for player (X), move with heighest score
+	*/
+	Eval maxValue(const Board& board);
+	/**
+	* returns min value for player(O), move with lowest score
+	*/
+	Eval minValue(const Board& board);
+
+};
+
+
+

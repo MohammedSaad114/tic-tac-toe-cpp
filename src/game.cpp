@@ -1,108 +1,87 @@
 #include "game.h"
-#include <stdexcept>
 
-Board initialState()
+Game::Game(Cell currentPlayer) : m_current{currentPlayer} {}
+
+void Game::resetBoard()
 {
-	return std::vector<std::vector<int>>(3, std::vector<int>(3, EMPTY));
+	m_board = { std::vector<std::vector<Cell>>(3, std::vector<Cell>(3, EMPTY)) };
 }
 
-int player(const Board& board)
+Cell Game::player(const Board& board)
 {
-	if (board == initialState())
+	if (board.isEmpty())
 	{
 		return X;
 	}
-	else
-	{
 		int countX = 0;
 		int countO = 0;
-		for (size_t i = 0; i < board.size(); ++i)
+		for (size_t i = 0; i < board.grid.size(); ++i)
 		{
-			for (size_t j = 0; j < board[i].size(); ++j)
-			{
-				if (board[i][j] == X)
+			for (size_t j = 0; j < board.grid[i].size(); ++j)
+				if (board.grid[i][j] == X)
 					countX++;
-				else if (board[i][j] == O)
+				else if (board.grid[i][j] == O)
 					countO++;
-			}
 		}
 		return (countX > countO) ? O : X;
-	}
 }
 
-std::set<Move> actions(const Board& board)
+std::set<Move> Game::actions(const Board& board)
 {
 	std::set<Move> possibleActions;
-	for (size_t i = 0; i < board.size(); ++i)
+	for (size_t i = 0; i < board.grid.size(); ++i)
 	{
-		for (size_t j = 0; j < board[i].size(); ++j)
-		{
-			if (board[i][j] == EMPTY)
+		for (size_t j = 0; j < board.grid[i].size(); ++j)
+			if (board.grid[i][j] == EMPTY)
 				possibleActions.insert({ i,j });
-		}
 	}
 	return possibleActions;
 }
 
-Board result(const Board& board, Move action)
+Board Game::result(const Board& board, Move action)
 {
 	int i = action.first;
 	int j = action.second;
-	if (actions(board).count({i, j}) == 0)
-	{
-		throw std::runtime_error("Invalid action: Cell is not empty.");
-	} 
-	else
-	{
-		Board newBoard = board;
-		newBoard[i][j] = player(board);
-		return newBoard;
-	}
+	Board newBoard = board;
+	newBoard.grid[i][j] = player(board);		
+	return newBoard;
 }
 
-int winner(const Board& board)
+Cell Game::winner(const Board& board)
 {
 	// check diagonals
-	if (board[0][0] != EMPTY && board[0][0] == board[1][1] && board[1][1] == board[2][2]) return board[1][1];
-	if (board[2][0] != EMPTY && board[2][0] == board[1][1] && board[1][1] == board[0][2]) return board[1][1];
+	if (board.grid[0][0] != EMPTY && board.grid[0][0] == board.grid[1][1] && board.grid[1][1] == board.grid[2][2]) return board.grid[1][1];
+	if (board.grid[2][0] != EMPTY && board.grid[2][0] == board.grid[1][1] && board.grid[1][1] == board.grid[0][2]) return board.grid[1][1];
 			
 	// check rows
 	for (size_t i = 0; i < 3; ++i)
-		if (board[i][0] != EMPTY && board[i][0] == board[i][1] && board[i][1] == board[i][2]) return board[i][0];
+		if (board.grid[i][0] != EMPTY && board.grid[i][0] == board.grid[i][1] && board.grid[i][1] == board.grid[i][2]) return board.grid[i][0];
 
 	// check columns
 	for (size_t j = 0; j < 3; ++j)
-		if (board[0][j] != EMPTY && board[0][j] == board[1][j] && board[1][j] == board[2][j]) return board[0][j];
+		if (board.grid[0][j] != EMPTY && board.grid[0][j] == board.grid[1][j] && board.grid[1][j] == board.grid[2][j]) return board.grid[0][j];
 
 	return EMPTY;
 }
 
-bool terminal(const Board& board)
+bool Game::terminal(const Board& board)
 {
 	if (winner(board) != EMPTY)
-	{
 		return true;
-	}
-	else
-	{
-		if (actions(board).empty())
-			return true;
-		return false;
-	}
+	if (actions(board).empty())
+		return true;		
+	return false;
+	
 }
 
-// forward declarations
-static Eval maxValue(const Board& board);
-static Eval minValue(const Board& board);
-static const Move kNoMove{ -1,-1 };
 
-Eval optimalAction(const Board& board)
+
+Eval Game::optimalAction(const Board& board)
 {
 	return (player(board) == X) ? maxValue(board) : minValue(board);
 }
 
-// Max value for player (X), move with heighest score
-static Eval maxValue(const Board& board)
+Eval Game::maxValue(const Board& board)
 {
 	// if game ends, return winner val and no action
 	if (terminal(board))
@@ -129,8 +108,7 @@ static Eval maxValue(const Board& board)
 
 }
 
-// returns min value for player (O), move with lowest score
-static Eval minValue(const Board& board)
+Eval Game::minValue(const Board& board)
 {
 	// if game ends, return winner val and no action
 	if (terminal(board))

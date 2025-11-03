@@ -4,30 +4,33 @@
 
 enum class State { Menu, Playing };
 
-struct App {
+class App {
+private:
 	// window
-	int width{}, height{};
-
+	int m_width{}, m_height{};
 	// game
-	State state{ State::Menu };
-	int user{ 0 };
-	Board board = initialState();
-	bool  aiTurn{ false };
-	double aiTimer{ 0.0 };
-	double aiDelay{ 0.5 };
+	State m_state{ State::Menu };
+	int m_user{ 0 };
+	Game m_game;
+	bool  m_aiTurn{ false };
+	double m_aiTimer{ 0.0 };
+	double m_aiDelay{ 0.5 };
 
 	// layout
-	int tileSize{ 80 };
-	Vector2 origin{};
-	Rectangle tiles[3][3]{};
+	int m_tileSize{ 80 };
+	Vector2 m_origin{};
+	Rectangle m_tiles[3][3]{};
+public:
+	App(int w, int h);
+	/**
+	* handles input, update of one frame
+	*/
+	void frame();
+	void drawMenu();
+	void drawCenteredText(const char* s, int y, int size, Color c, int winW);
+	void drawBoard();
+	void playAgain();
+	void updatePlaying();
+	void runGame();
 };
 
-/**
-* init ui and game info
-*/
-void initApp(App& app, int w, int h);
-
-/**
-* handles input, update of one frame
-*/
-void frame(App& app);
