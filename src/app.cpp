@@ -1,43 +1,39 @@
 #include "app.h"
 
-App::App(int w, int h): m_width{w}, m_height{h}, m_game {Game(Cell::EMPTY)} {
-    m_origin = { m_width / 2.0f - 1.5f * m_tileSize, m_height / 2.0f - 1.5f * m_tileSize };
+App::App(int w, int h) : m_width{ w }, m_height{ h }, m_game{ Game(Cell::EMPTY) }
+{
+	m_origin = { m_width / 2.0f - 1.5f * m_tileSize, m_height / 2.0f - 1.5f * m_tileSize };
 };
 
 void App::drawCenteredText(const char* s, int y, int size, Color c, int winW)
 {
-   
-    Vector2 size = MeasureTextEx(a.uiFont, s, fontSize, 1.0f);
-    Vector2 pos{
-       r.x + (r.width - size.x) / 2.0f,
-       r.y + (r.height - size.y) / 2.0f
-    };
-    DrawTextEx(a.uiFont, s, pos, fontSize, 1.0f, c);
+	int tw = MeasureText(s, size);
+	DrawText(s, (winW - tw) / 2, y, size, c);
 }
 
 void App::drawMenu()
 {
-    // Title
-    drawCenteredText("Play Tic-Tac-Toe", 50, 40, RAYWHITE, m_width);
+	// Title
+	drawCenteredText("Play Tic-Tac-Toe", 50, 40, RAYWHITE, m_width);
 
-    // Buttons
-    Rectangle bx{ m_width / 8.0f,   m_height / 2.0f, m_width / 4.0f, 50.0f };
-    Rectangle bo{ 5 * m_width / 8.0f, m_height / 2.0f, m_width / 4.0f, 50.0f };
+	// Buttons
+	Rectangle bx{ m_width / 8.0f,   m_height / 2.0f, m_width / 4.0f, 50.0f };
+	Rectangle bo{ 5 * m_width / 8.0f, m_height / 2.0f, m_width / 4.0f, 50.0f };
 
-    DrawRectangleRec(bx, RAYWHITE);
-    int twX = MeasureText("Play as X", 24);
-    DrawText("Play as X", bx.x + (bx.width - twX) / 2, bx.y + (bx.height - 24) / 2, 24, BLACK);
+	DrawRectangleRec(bx, RAYWHITE);
+	int twX = MeasureText("Play as X", 24);
+	DrawText("Play as X", bx.x + (bx.width - twX) / 2, bx.y + (bx.height - 24) / 2, 24, BLACK);
 
-    DrawRectangleRec(bo, RAYWHITE);
-    int twO = MeasureText("Play as O", 24);
-    DrawText("Play as O", bo.x + (bo.width - twO) / 2, bo.y + (bo.height - 24) / 2, 24, BLACK);
+	DrawRectangleRec(bo, RAYWHITE);
+	int twO = MeasureText("Play as O", 24);
+	DrawText("Play as O", bo.x + (bo.width - twO) / 2, bo.y + (bo.height - 24) / 2, 24, BLACK);
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-        Vector2 m = GetMousePosition();
-        if (CheckCollisionPointRec(m, bx)) { m_user = X; m_game.m_board; m_state = State::Playing; }
-        else if (CheckCollisionPointRec(m, bo)) { m_user = O; m_game.m_board; m_state = State::Playing; }
-    }
+	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+	{
+		Vector2 m = GetMousePosition();
+		if (CheckCollisionPointRec(m, bx)) { m_user = X; m_game.m_board; m_state = State::Playing; }
+		else if (CheckCollisionPointRec(m, bo)) { m_user = O; m_game.m_board; m_state = State::Playing; }
+	}
 }
 
 void App::drawBoard()
@@ -142,15 +138,16 @@ void App::frame()
 }
 
 void App::runGame()
-{   
+{
 	// Tell the window to use vsync and work on high DPI displays
-	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);	
+	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 	// Create the window and OpenGL context
 	InitWindow(m_width, m_height, "Tic Tac Toe");
 	SetTargetFPS(60);
 
 	// game loop
-	while (!WindowShouldClose()) {		
+	while (!WindowShouldClose())
+	{
 		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 		// drawing
 		BeginDrawing();
@@ -162,4 +159,3 @@ void App::runGame()
 	// destroy the window and cleanup the OpenGL context
 	CloseWindow();
 }
-
